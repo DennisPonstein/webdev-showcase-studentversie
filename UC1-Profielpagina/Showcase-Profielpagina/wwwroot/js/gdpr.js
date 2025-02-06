@@ -5,7 +5,7 @@ class GDPR {
         this.showContent();
         this.bindEvents();
 
-        if(this.cookieStatus() !== 'accept') this.showGDPR();
+        if(this.cookieStatus() !== 'accept' || 'reject') this.showGDPR();
     }
 
     bindEvents() {
@@ -19,7 +19,13 @@ class GDPR {
 
 
 //student uitwerking
-
+        let buttonReject = document.querySelector('.gdpr-consent__button--reject');
+        buttonReject.addEventListener('click', () => {
+            this.cookieStatus('reject');
+            this.showStatus();
+            this.showContent();
+            this.hideGDPR();
+        });
 
     }
 
@@ -36,7 +42,7 @@ class GDPR {
             '.content-gdpr-accept',
 
 //student uitwerking
-
+            '.content-gdpr-reject',
             '.content-gdpr-not-chosen'];
 
         for(const c of classes){
@@ -51,15 +57,35 @@ class GDPR {
     }
 
     cookieStatus(status) {
-
-        if (status) localStorage.setItem('gdpr-consent-choice', status);
-
-//student uitwerking
-
+        
+        if (status) {
+            localStorage.setItem('gdpr-consent-choice', status);
+            this.safeMetaData();
+        }
+       
+        //student uitwerking
+        
         return localStorage.getItem('gdpr-consent-choice');
     }
 
-//student uitwerking
+    //student uitwerking
+
+    safeMetaData() {
+        let currentDate = new Date();
+
+        /*
+        Date.parse() and the Date() constructor both accept strings in the date time string format as input. Furthermore, 
+        implementations are allowed to support other date formats when the input fails to match this format.
+
+        */
+        let currentDateFormattednew = new Date('DD-MMYYYY');
+        //let currentTimeFormatted
+
+        let currentDateFormatted = `${currentDate.getDate()}-${currentDate.getMonth() + 1}-${currentDate.getFullYear()}`;
+        let currentTimeFormatted = `${currentDate.getHours()}:${currentDate.getMinutes()}`;
+        let dateTime = { datum: currentDateFormattednew, tijd: currentTimeFormatted };
+        localStorage.setItem('gdpr-consent-date', JSON.stringify(dateTime));
+    }
 
 
     hideGDPR(){
