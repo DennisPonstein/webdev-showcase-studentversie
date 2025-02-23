@@ -3,41 +3,65 @@
     ViewData["Title"] = "Contactpagina";
 }
 
+@* <script src="https://www.google.com/recaptcha/api.js" async defer></script> *@
+
 <div class="page">
     <section class="contact">
 
         <h1>Contact</h1>
+        <h2>Neem contact op met Dennis Ponstein</h2>
         <p>@ViewBag.Message</p>
-        <form method="post" class="form-contactpagina">
-
+        <div id="responseMessage"></div>
+        <form method="post" class="form-contactpagina" id="form">
+            <div class="form-contactpagina__inputelement fx-col">
+                <div class="spinner" id="spinner" style="display: none"></div>
+            </div>
             <div class="form-contactpagina__inputelement fx-col">
                 <label for="firstname">Voornaam: </label>
-                <input type="text" asp-for="FirstName" name="firstname" id="firstname" required>
+                <input type="text" asp-for="FirstName" name="firstname" id="firstname" required />
             </div>
 
             <div class="form-contactpagina__inputelement fx-col">
                 <label for="lastname">Achternaam: </label>
-                <input type="text" asp-for="LastName" name="lastname" id="lastname" required>
+                <input type="text" asp-for="LastName" name="lastname" id="lastname" required/>
             </div>
 
             <div class="form-contactpagina__inputelement fx-col">
                 <label for="email">E-mailadres: </label>
-                <input type="email" asp-for="Email" name="email" id="email">
+                <input type="email" asp-for="Email" name="email" id="email" required/>
             </div>
 
             <div class="form-contactpagina__inputelement fx-col">
                 <label for="phone">Telefoonnummer: </label>
-                <input type="tel" asp-for="Phone" name="phone" id="phone" required>
+                <input type="tel" asp-for="Phone" name="phone" id="phone" required/>
             </div>
+
+            <div class="form-contactpagina__inputelement fx-col">
+                <label for="subject">Onderwerp: </label>
+                <input type="text" asp-for="Subject" name="subject" id="subject" required/>
+            </div>
+
+            <div class="form-contactpagina__inputelement fx-col">
+                <label for="message">bericht: </label>
+                <textarea asp-for="Message" name="message" id="message" required></textarea>
+            </div>
+
+            <div class="form-contactpagina__inputelement fx-col">
+                <label for="captcha" id="captcha"></label>
+                <input type="number" name="captchaCheck" id="captchaCheck"/>
+            </div>
+
+
+
+            @* <div class="g-recaptcha" data-sitekey="6LcNOOAqAAAAAC6MEOvz1BfAPiNWjgmMqnZNMpbk"></div> *@
+
+            @* <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response" value=""> *@
+
 
             <div class="form-contactpagina__inputelement">
-                <input type="submit" value="Verstuur!">
-                <input type="reset" / value="Reset!">
+                <input type="submit" value="Stuur bericht" id="submitButton" disabled>
+                @* <input type="reset" value="Reset!"> *@
             </div>
-           
-
-            
-
         </form>
 
     </section>
@@ -45,77 +69,246 @@
 
 
 <script>
-   const inputEmail = document.getElementById('email');
+
+     const inputFirstName = document.getElementById('firstname');
+     const inputLastName = document.getElementById('lastname');
+     const inputEmail = document.getElementById('email');
+     const inputPhone = document.getElementById('phone');
+     const inputSubject = document.getElementById('subject');
+     const inputMessage = document.getElementById('message');
+     const inputCaptcha = document.getElementById('captchaCheck');
+
+    // const inputRecaptcha = document.getElementById('g-recaptcha-response');
+
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+    function getRandomInt(max = 100) {
+      return Math.floor(Math.random() * max);
+    }
+
+    const captchaNumberA = getRandomInt();
+    const captchaNumberB = getRandomInt();
+
+    const captchalabel = document.getElementById('captcha').innerHTML=`Hoeveel is ${captchaNumberA} + ${captchaNumberB}`
+  
+      const validateFirstName = () => {
+          if (inputFirstName.validity.typeMismatch) {
+             inputFirstName.setCustomValidity("Voer een geldige voornaam in!");
+             inputFirstName.reportValidity();
+          } else if (inputFirstName.value.length > 60) {
+             inputFirstName.setCustomValidity("Voornaam moet niet langer dan 60 tekens zijn!");
+             inputFirstName.reportValidity();
+         } else {
+             inputFirstName.setCustomValidity("");
+         }
+     };
+
+      const validateLastName = () => {
+          if (inputLastName.validity.typeMismatch) {
+             inputLastName.setCustomValidity("Voer een geldige achternaam in!");
+              inputLastName.reportValidity();
+          } else if (inputLastName.value.length > 60) {
+              inputLastName.setCustomValidity("Achternaam moet niet langer dan 60 tekens zijn!");
+              inputLastName.reportValidity();
+         } else {
+              inputLastName.setCustomValidity("");
+         }
+     };
+
+     // regex?
+     const validateEmail = () => {
+        if (inputEmail.validity.typeMismatch) {
+            inputEmail.setCustomValidity("Voer een geldig e-mailadres in!");
+            inputEmail.reportValidity();
+        } else if (inputEmail.value.length > 60) {
+            inputEmail.setCustomValidity("Email moet niet langer dan 60 tekens zijn!");
+            inputEmail.reportValidity();
+        } else {
+            inputEmail.setCustomValidity("");
+        }
+    };
+
+     const phoneRegex = /^\+?[0-9]{1,3}[\s\-()]?[0-9]{1,4}[\s\-()]?[0-9]{1,4}[\s\-()]?[0-9]{1,9}$/;
+
+     const validatePhone = () => {
+         if (inputPhone.validity.typeMismatch) {
+             inputPhone.setCustomValidity("Voer een geldig telefoonnummer in!");
+             inputPhone.reportValidity();
+         } else if(inputPhone.value.length > 60){
+            inputEmail.setCustomValidity("Telefoonnummer moet niet langer dan 6 tekens zijn!");
+            inputEmail.reportValidity();
+         
+         } else if (!phoneRegex.test(inputPhone.value)) {
+             inputPhone.setCustomValidity("Incorrect telefoonnummer!");
+             inputPhone.reportValidity();
+
+         } else {
+             inputPhone.setCustomValidity("");
+         }
+
+     };
+
+     const validateSubject= () => {
+           if (inputSubject.validity.typeMismatch) {
+              inputSubject.setCustomValidity("Voer een geldig onderwerp in!");
+              inputSubject.reportValidity();
+           } else if (inputSubject.value.length > 200) {
+               inputSubject.setCustomValidity("Onderwerp moet niet langer dan 200 tekens zijn!");
+               inputSubject.reportValidity();
+          } else {
+               inputSubject.setCustomValidity("");
+          }
+      };
+
+     const validateMessage = () => {
+           if (inputMessage.validity.typeMismatch) {
+               inputMessage.setCustomValidity("Voer een geldig bericht in!");
+               inputMessage.reportValidity();
+          } else if (inputMessage.value.length > 600) {
+               inputMessage.setCustomValidity("Bericht moet niet langer dan 600 tekens zijn!");
+               inputMessage.reportValidity();
+          } else {
+               inputMessage.setCustomValidity("");
+          }
+      };
 
 
-   const validateEmail = () => { 
-       if (inputEmail.validity.typeMismatch) {
-           inputEmail.setCustomValidity("Voer een geldig e-mailadres in!");
-           inputEmail.reportValidity();
-       } else if (inputEmail.value.length > 80) {
-           inputEmail.setCustomValidity("Email moet niet langer dan 80 tekens zijn!");
-       } else {
-           inputEmail.setCustomValidity("");
-       }
-   }
+       const validateCaptcha = () => {
+           if (inputCaptcha.validity.typeMismatch) {
+               inputCaptcha.setCustomValidity("Voer een geldig nummer in!");
+               inputCaptcha.reportValidity();
+              } else if (parseInt(inputCaptcha.value) !== (captchaNumberA + captchaNumberB)) {
+               console.log()
+               inputCaptcha.setCustomValidity("Verkeerd antwoord");
+               inputCaptcha.reportValidity();
+          } else {
+               inputCaptcha.setCustomValidity("");
+          }
+      };
 
-   const validateForm = () => {
-       validateEmail();
-   }
+       const validateForm = () => {
+         validateFirstName();
+         validateLastName();
+         validateEmail();
+         validatePhone();
+         validateSubject();
+         validateMessage();
+         validateCaptcha();
+     }
 
-   // Event listener voor email
-   // Aanbevolen events voor formulieren: https://github.com/Windesheim-HBO-ICT/client_studenten/blob/main/lessen/week-2/les-1/form-constraint-validation-api/studentversie/events-voor-invoer-validatie.md
-   inputEmail.addEventListener("blur", validateEmail);
-   inputEmail.addEventListener("input", validateEmail);
 
-   // Selecteer het formelement
-   const form = document.querySelector('.form-contactpagina');
 
-   // Event listener voor formulierinzending
-   form.addEventListener('submit', function (event) {
-       event.preventDefault(); // Voorkom standaard formulierinzending
+    // Event listener voor email
+    // Aanbevolen events voor formulieren: https://github.com/Windesheim-HBO-ICT/client_studenten/blob/main/lessen/week-2/les-1/form-constraint-validation-api/studentversie/events-voor-invoer-validatie.md
 
-      // Valideer alle velden voor de zekerheid
-       validateForm();
 
-       // Verkrijg CSRF-token van het formulier
-       const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]').value;
+     inputFirstName.addEventListener("blur", validateFirstName);
+     inputFirstName.addEventListener("input", validateFirstName);
 
-       // Serialiseer formuliergegevens
-       const formData = new URLSearchParams();
+     inputLastName.addEventListener("blur", validateLastName);
+     inputLastName.addEventListener("input", validateLastName);
 
-       formData.append('email', form.email.value);
-        
-       formData.append('__RequestVerificationToken', csrfToken); // Voeg CSRF-token toe
+     inputEmail.addEventListener("blur", validateEmail);
+     inputEmail.addEventListener("input", validateEmail);
 
-       // Voer een POST-verzoek uit
-       fetch('/contact', {
-           method: 'POST',
-           headers: {
-               'Content-Type': 'application/x-www-form-urlencoded' // Stel de inhoudstype in
-           },
-           body: formData // Stuur de geserialiseerde formuliergegevens als de body
-       })
-           .then(response => {
-               if (!response.ok) {
-                   throw new Error('Netwerkrespons was niet ok');
-               }
-               return response.text();
-           })
-           .then(data => {
-               // Verwerk succesvolle formulierinzending
-               console.log('Formulier succesvol ingediend:', data);
-               // Optioneel: je kunt hier een redirect uitvoeren of een succesbericht tonen
+     inputPhone.addEventListener("blur", validatePhone);
+     inputPhone.addEventListener("input", validatePhone);
 
-           })
-           .catch(error => {
-               console.error('Er was een probleem met de formulierinzending:', error);
+     inputSubject.addEventListener("blur", validateSubject);
+     inputSubject.addEventListener("input", validateSubject);
 
-               alert(error.message)
+     inputMessage.addEventListener("blur", validateMessage);
+     inputMessage.addEventListener("input", validateMessage);
 
-               // Verwerk fouten hier
-           });
-   });
+     inputCaptcha.addEventListener("blur", validateCaptcha);
+     inputCaptcha.addEventListener("input", validateCaptcha);
+
+
+    // Selecteer het formelement
+    const form = document.querySelector('.form-contactpagina');
+    const submitButton = document.getElementById("submitButton");
+
+    form.addEventListener("input" , () => {
+            submitButton.disabled = !form.checkValidity();
+       });
+
+    // Event listener voor formulierinzending
+    form.addEventListener('submit', function (event) {
+        event.preventDefault(); // Voorkom standaard formulierinzending
+
+       // Valideer alle velden voor de zekerheid
+        validateForm();
+
+        //validate captcha
+        //  const captcha = grecaptcha.getResponse()
+
+        // Verkrijg CSRF-token van het formulier
+        const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+        // Serialiseer formuliergegevens
+        const formData = new URLSearchParams();
+
+
+        formData.append('firstname', form.firstname.value);
+        formData.append('lastname', form.lastname.value);
+        formData.append('email', form.email.value);
+        formData.append('phone', form.phone.value);
+        formData.append('subject', form.subject.value);
+        formData.append('message', form.message.value);
+
+
+        formData.append('__RequestVerificationToken', csrfToken); // Voeg CSRF-token toe
+
+        // doe spinner https://www.w3schools.com/howto/howto_css_loader.asp
+        const spinner = document.getElementById("spinner");
+        spinner.style.display = "block";
+        submitButton.disabled = true;
+
+
+
+        // Voer een POST-verzoek uit
+          fetch('/contact', {
+            method: 'POST',
+            headers: {
+                   'Content-Type': 'application/x-www-form-urlencoded' // Stel de inhoudstype in
+            },
+             body: formData // Stuur de geserialiseerde formuliergegevens als de body
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Netwerkrespons was niet ok');
+                }
+                return response.text();
+            })
+            .then(data => {
+                // Verwerk succesvolle formulierinzending
+                console.log('Formulier succesvol ingediend:', data);
+                // Optioneel: je kunt hier een redirect uitvoeren of een succesbericht tonen
+                responseMessage.innerHTML = "<p>formulier verzonden </p>";
+                spinner.style.display = "none";
+
+                    setTimeout(() => {
+                 alert("bericht verzonden");
+                }, 100);
+                document.getElementById("form").reset();
+                
+                
+            })
+            .catch(error => {
+                console.error('Er was een probleem met de formulierinzending:', error);
+                spinner.style.display = "none";
+
+                    setTimeout(() => {
+                    alert(error.message); 
+                    }, 100); 
+               
+
+                // Verwerk fouten hier
+                responseMessage.innerHTML = "<p>formulier niet verzonden, er is iets fout gegaan </p>";
+            })
+            .finally(() => {
+                submitButton.disabled = true;
+        });
+    });
 
 
 

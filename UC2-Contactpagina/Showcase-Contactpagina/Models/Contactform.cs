@@ -14,10 +14,22 @@ namespace Showcase_Contactpagina.Models
 
         [Required]
         [EmailAddress]
+        [StringLength(80)]
         public string Email { get; set; }
 
         [Required]
         [Phone]
+        [StringLength(20)]
         public string Phone { get; set; }
+
+        [Required]
+        [StringLength(200)]
+        public string Subject { get; set; }
+
+        [Required]
+        [StringLength(600)]
+        public string Message { get; set; }
+
+
     }
 }

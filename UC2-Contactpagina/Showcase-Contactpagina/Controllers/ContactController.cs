@@ -50,9 +50,11 @@ namespace Showcase_Contactpagina.Controllers
             //Hint: vergeet niet om de mailfunctionaliteit werkend te maken in ShowcaseAPI > Controllers > MailController.cs,
             //      nadat je een account hebt aangemaakt op Mailtrap (of een alternatief).
 
-            HttpResponseMessage response = new HttpResponseMessage(); // Vervang deze regel met het POST-request
+            //HttpResponseMessage response = new HttpResponseMessage(); // Vervang deze regel met het POST-request
 
-            if(!response.IsSuccessStatusCode)
+            HttpResponseMessage response = await _httpClient.PostAsync("api/mail",  content);
+
+            if (!response.IsSuccessStatusCode)
             {
                 ViewBag.Message = "Er is iets misgegaan";
                 return View();
